@@ -10,7 +10,7 @@ export interface ICharacter {
 }
 
 const characters = [
-  {
+    {
     name: 'Luke SkyWalker',
     height: '172',
     mass: '77',
@@ -89,6 +89,16 @@ const characters = [
     eye_color: 'red',
     birth_year: 'unknown',
     gender: 'n/a',
+  },
+  {
+    name: 'Biggs Darklighter',
+    height: '183',
+    mass: '84',
+    hair_color: 'black',
+    skin_color: 'light',
+    eye_color: 'brown',
+    birth_year: '24BBY',
+    gender: 'male',
   },
 ]
 

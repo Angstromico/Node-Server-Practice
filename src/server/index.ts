@@ -1,4 +1,6 @@
 import http from 'http'
+import fs from 'fs/promises'
+import path from 'path'
 import { OK, NOT_FOUND } from '@/utils/status-codes.js'
 import characters from './characters.js'
 import type { ICharacter } from './characters.js'
@@ -15,21 +17,72 @@ const server = http.createServer((req, res) => {
       body += chunk.toString()
     })
 
-    req.on('end', () => {
+    req.on('end', async () => {
+      void handleCharacterPost(body, res)
+    })
+
+    async function handleCharacterPost(body: string, res: http.ServerResponse) {
       try {
         const newCharacter = JSON.parse(body) as ICharacter
 
-        if (newCharacter.name) {
+        if (
+          newCharacter.name &&
+          newCharacter.height &&
+          newCharacter.mass &&
+          newCharacter.hair_color &&
+          newCharacter.skin_color &&
+          newCharacter.eye_color &&
+          newCharacter.birth_year &&
+          newCharacter.gender
+        ) {
           characters.push(newCharacter)
 
+          const charactersFilePath = path.join(process.cwd(), 'src', 'server', 'characters.ts')
+
+          const currentContent = await fs.readFile(charactersFilePath, 'utf-8')
+
+          const interfaceMatch = currentContent.match(/export interface ICharacter \{[\s\S]*?\}/)
+          const interfacePart = interfaceMatch ? interfaceMatch[0] : ''
+
+          const newCharactersArray = `const characters = [
+  ${characters
+    .map(
+      (char) => `  {
+    name: '${char.name}',
+    height: '${char.height}',
+    mass: '${char.mass}',
+    hair_color: '${char.hair_color}',
+    skin_color: '${char.skin_color}',
+    eye_color: '${char.eye_color}',
+    birth_year: '${char.birth_year}',
+    gender: '${char.gender}',
+  }`
+    )
+    .join(',\n')},
+]`
+
+          const newContent = `${interfacePart}
+
+${newCharactersArray}
+
+export default characters
+`
+
+          await fs.writeFile(charactersFilePath, newContent, 'utf-8')
+
           res.writeHead(201, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify({ message: 'Character added!', data: newCharacter }))
+          res.end(
+            JSON.stringify({
+              message: 'Character added and saved permanently!',
+              data: newCharacter,
+            })
+          )
         }
       } catch (error) {
         res.writeHead(400, { 'Content-Type': 'application/json' })
         res.end(
           JSON.stringify({
-            error: 'Invalid JSON',
+            error: 'Invalid JSON or file write error',
             details:
               typeof error === 'string'
                 ? error
@@ -39,7 +92,7 @@ const server = http.createServer((req, res) => {
           })
         )
       }
-    })
+    }
     return
   }
 
