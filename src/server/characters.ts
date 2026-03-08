@@ -100,6 +100,16 @@ const characters = [
     birth_year: '24BBY',
     gender: 'male',
   },
+  {
+    name: 'Obi-Wan Kenobi',
+    height: '182',
+    mass: '77',
+    hair_color: 'auburn, white',
+    skin_color: 'fair',
+    eye_color: 'blue-gray',
+    birth_year: '57BBY',
+    gender: 'male',
+  },
 ]
 
 export default characters
